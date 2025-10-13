@@ -64,3 +64,49 @@ export const createBlogPost = async (req, res, next) => {
     return next(err);
   }
 };
+
+/* ----------------------------------------------------------------
+ * 2.  LIST  – GET /api/blog
+ * ----------------------------------------------------------------
+ * Query-params:
+ *   ?page=1&limit=10&status=published&category=Application%20Tips&q=essay
+ * ----------------------------------------------------------------*/
+export const listBlogPosts = async (req, res, next) => {
+  try {
+    /* --------- Parse query params ---------- */
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit) || 10, 50); // hard-cap 50
+    const status = req.query.status ?? "published"; // default
+    const category = req.query.category; // optional
+    const searchQ = req.query.q; // optional text search
+
+    /* --------- Build Mongo filter ---------- */
+    const filter = {};
+    if (status) filter.status = status;
+    if (category) filter["categories.name"] = category;
+    if (searchQ) filter.$text = { $search: searchQ }; // requires text index (see **Note**)
+
+    /* --------- Execute query ---------- */
+    const [posts, total] = await Promise.all([
+      BlogPost.find(filter)
+        .sort({ publishedAt: -1 }) // newest first
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .select("-contentHtml") // omit heavy field in list view
+        .lean(),
+      BlogPost.countDocuments(filter),
+    ]);
+
+    return res.json({
+      data: posts,
+      meta: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
