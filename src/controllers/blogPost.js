@@ -118,7 +118,7 @@ export const getBlogPostBySlug = async (req, res, next) => {
   try {
     const post = await BlogPost.findOne({
       slug: req.params.slug,
-      status: "published", // only published are public
+      //   status: "published", // only published are public
     });
 
     if (!post) return res.status(404).json({ message: "Post not found" });
