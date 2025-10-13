@@ -110,3 +110,21 @@ export const getBlogPosts = async (req, res, next) => {
     return next(err);
   }
 };
+
+/* ----------------------------------------------------------------
+ * 3.  DETAIL – GET /api/blog/:slug
+ * ----------------------------------------------------------------*/
+export const getBlogPostBySlug = async (req, res, next) => {
+  try {
+    const post = await BlogPost.findOne({
+      slug: req.params.slug,
+      status: "published", // only published are public
+    });
+
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    return res.json(post);
+  } catch (err) {
+    return next(err);
+  }
+};
