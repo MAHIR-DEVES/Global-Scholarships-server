@@ -118,7 +118,7 @@ export const getBlogPostBySlug = async (req, res, next) => {
   try {
     const post = await BlogPost.findOne({
       slug: req.params.slug,
-      //   status: "published", // only published are public
+      status: "published", // only published are public
     });
 
     if (!post) return res.status(404).json({ message: "Post not found" });
@@ -163,6 +163,32 @@ export const updateBlogPost = async (req, res, next) => {
     if (!post) return res.status(404).json({ message: "Post not found" });
 
     res.json(post);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ================================================================
+ * 5. DELETE  – DELETE /api/blog/:id
+ * ===============================================================*/
+export const deleteBlogPost = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    /* Hard-delete (physically removes doc) */
+    const result = await BlogPost.findByIdAndDelete(id);
+
+    if (!result) return res.status(404).json({ message: "Post not found" });
+
+    /* 🔀  Prefer “soft delete”?  Replace the two lines above with:
+       const result = await BlogPost.findByIdAndUpdate(
+         id,
+         { status: 'archived' },
+         { new: true }
+       );
+    */
+
+    res.json({ message: "Post deleted", id: result._id });
   } catch (err) {
     next(err);
   }
