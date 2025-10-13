@@ -71,7 +71,7 @@ export const createBlogPost = async (req, res, next) => {
  * Query-params:
  *   ?page=1&limit=10&status=published&category=Application%20Tips&q=essay
  * ----------------------------------------------------------------*/
-export const listBlogPosts = async (req, res, next) => {
+export const getBlogPosts = async (req, res, next) => {
   try {
     /* --------- Parse query params ---------- */
     const page = Math.max(parseInt(req.query.page) || 1, 1);
