@@ -128,3 +128,42 @@ export const getBlogPostBySlug = async (req, res, next) => {
     return next(err);
   }
 };
+
+/* ================================================================
+ * 4. UPDATE  – PUT /api/blog/:id            (full or partial)
+ * ===============================================================*/
+export const updateBlogPost = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    /* ---> Security hint:
+       Pick only fields you’re willing to let the client change   */
+    const ALLOWED = [
+      "title",
+      "excerpt",
+      "contentHtml",
+      "coverImageUrl",
+      "categories",
+      "status",
+      "publishedAt",
+      "metaTitle",
+      "metaDescription",
+    ];
+
+    const payload = ALLOWED.reduce((obj, key) => {
+      if (req.body[key] !== undefined) obj[key] = req.body[key];
+      return obj;
+    }, {});
+
+    const post = await BlogPost.findByIdAndUpdate(id, payload, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    res.json(post);
+  } catch (err) {
+    next(err);
+  }
+};
