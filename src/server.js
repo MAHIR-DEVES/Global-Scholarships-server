@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import scholarshipRoutes from "./routes/scholarshipRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
 
 // require("dotenv").config();
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(express.json());
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/scholarships", scholarshipRoutes);
+app.use("/api/blog", blogRoutes);
 
 // test route
 app.get("/", (req, res) => {
