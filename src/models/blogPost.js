@@ -47,7 +47,7 @@ const BlogPostSchema = new Schema(
     /* Content */
     excerpt: { type: String, trim: true },
     contentHtml: { type: String, required: true },
-    coverImageUrl: { type: String },
+    coverImageUrl: [{ type: String }],
 
     /* Relationships */
     author: { type: AuthorSchema, required: true },
