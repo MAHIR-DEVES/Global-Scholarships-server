@@ -5,7 +5,7 @@ import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import scholarshipRoutes from "./routes/scholarshipRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
-
+import tutorialRoutes from "./routes/tutorialRoutes.js";
 // require("dotenv").config();
 dotenv.config();
 // Connect to database
@@ -14,14 +14,44 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+// Custom CORS middleware to handle multiple origins
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    "http://localhost:3000",
+    "http://localhost:3002",
+  ];
+
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-Requested-With, Content-Type, Authorization"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
+
+  next();
+});
 app.use(express.json());
 
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/scholarships", scholarshipRoutes);
 app.use("/api/blog", blogRoutes);
-
+app.use("/api/tutorials", tutorialRoutes);
 // test route
 app.get("/", (req, res) => {
   res.send("API is working!");
