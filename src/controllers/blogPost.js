@@ -20,47 +20,45 @@ export const createBlogPost = async (req, res, next) => {
       title,
       slug,
       excerpt,
-      content_html, // snake-case in incoming JSON
-      cover_image_url,
+      contentHtml,
+      coverImageUrl,
       author,
       categories = [],
       status = "draft",
-      published_at,
-      meta_title,
-      meta_description,
+      publishedAt,
+      metaTitle,
+      metaDescription,
     } = req.body;
 
     /* Build the payload that matches the Mongoose schema */
     const postPayload = {
       title,
-      slug, // auto-generated in schema if omitted
+      slug,
       excerpt,
-      contentHtml: content_html,
-      coverImageUrl: cover_image_url,
+      contentHtml,
+      coverImageUrl,
       author: {
         name: author?.name,
         email: author?.email,
-        image: author?.image,
+        image: author?.image || undefined,
       },
       categories: categories.map((c) =>
         typeof c === "string" ? { name: c } : c
       ),
       status,
-      publishedAt: published_at,
-      metaTitle: meta_title,
-      metaDescription: meta_description,
+      publishedAt,
+      metaTitle,
+      metaDescription,
     };
 
     /* ─────────────── Persist ─────────────── */
     const post = await BlogPost.create(postPayload);
 
-    return res.status(201).json(post); // 201 = Created
+    return res.status(201).json(post);
   } catch (err) {
-    /* Handle duplicate slug gracefully */
     if (err.code === 11000 && err.keyPattern?.slug) {
       return res.status(409).json({ message: "Slug already exists" });
     }
-    /* Let global error middleware tackle the rest */
     return next(err);
   }
 };
