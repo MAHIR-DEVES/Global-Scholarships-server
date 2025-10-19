@@ -5,7 +5,9 @@ export const createTutorial = async (req, res) => {
   try {
     const { title, videoUrl, description } = req.body;
     const newTutorial = await Tutorial.create({ title, videoUrl, description });
-    res.status(201).json(newTutorial);
+    res
+      .status(201)
+      .json({ message: 'Tutorial added successfully!', status: true });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
