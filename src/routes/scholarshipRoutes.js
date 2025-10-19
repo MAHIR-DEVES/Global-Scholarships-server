@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 router.post('/', createScholarship);
-router.get('/', getAllScholarships);
+router.get('/', getAllScholarships); // optional filters: ?level=PhD&country=USA&major=CS
 router.get('/:id', getScholarshipById);
 router.put('/:id', updateScholarship);
 router.delete('/:id', deleteScholarship);
