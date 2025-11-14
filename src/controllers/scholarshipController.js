@@ -16,18 +16,38 @@ export const createScholarship = async (req, res) => {
 };
 
 // Get All Scholarships (with optional filters)
+// Get All Scholarships (with optional filters + deadline sorting)
 export const getAllScholarships = async (req, res) => {
   try {
     const { level, country, major } = req.query;
     let filter = {};
 
-    if (level) filter.level = { $regex: new RegExp(`^${level}$`, 'i') }; // case-insensitive
-    if (country) filter.country = { $regex: new RegExp(`^${country}$`, 'i') }; // case-insensitive
+    if (level) filter.level = { $regex: new RegExp(`^${level}$`, 'i') };
+    if (country) filter.country = { $regex: new RegExp(`^${country}$`, 'i') };
     if (major)
-      filter.majors = { $elemMatch: { $regex: new RegExp(major, 'i') } }; // case-insensitive inside array
+      filter.majors = { $elemMatch: { $regex: new RegExp(major, 'i') } };
 
     const scholarships = await Scholarship.find(filter);
-    res.status(200).json(scholarships);
+
+    const today = new Date();
+
+    // Deadline sorting logic
+    const sorted = scholarships.sort((a, b) => {
+      const deadlineA = new Date(a.applicationDeadline);
+      const deadlineB = new Date(b.applicationDeadline);
+
+      const aExpired = deadlineA < today;
+      const bExpired = deadlineB < today;
+
+      // Not expired first
+      if (!aExpired && bExpired) return -1;
+      if (aExpired && !bExpired) return 1;
+
+      // Same type → nearest deadline first
+      return deadlineA - deadlineB;
+    });
+
+    res.status(200).json(sorted);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
