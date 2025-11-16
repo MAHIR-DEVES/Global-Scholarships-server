@@ -6,6 +6,7 @@ import userRoutes from "./routes/userRoutes.js";
 import scholarshipRoutes from "./routes/scholarshipRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import tutorialRoutes from "./routes/tutorialRoutes.js";
+import courseRoutes from "./routes/courseRoutes.js";
 // require("dotenv").config();
 dotenv.config();
 // Connect to database
@@ -52,6 +53,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/scholarships", scholarshipRoutes);
 app.use("/api/blog", blogRoutes);
 app.use("/api/tutorials", tutorialRoutes);
+app.use("/api/v1/courses", courseRoutes);
 // test route
 app.get("/", (req, res) => {
   res.send("API is working!");

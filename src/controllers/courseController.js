@@ -1,5 +1,5 @@
-const Course = require("../models/course");
-const slugify = require("slugify");
+import Course from "../models/course.js";
+import slugify from "slugify";
 
 // Reusable error handler
 const handleError = (res, error) => {
@@ -15,7 +15,7 @@ const handleError = (res, error) => {
 
 // @desc    Create a new course
 // @route   POST /api/v1/courses
-exports.createCourse = async (req, res) => {
+export const createCourse = async (req, res) => {
   try {
     // Automatically create a slug from the title
     req.body.slug = slugify(req.body.title, { lower: true, strict: true });
@@ -29,7 +29,7 @@ exports.createCourse = async (req, res) => {
 
 // @desc    Get all courses (without sections/lectures for a lightweight response)
 // @route   GET /api/v1/courses
-exports.getAllCourses = async (req, res) => {
+export const getAllCourses = async (req, res) => {
   try {
     const courses = await Course.find()
       .select("-sections")
@@ -44,7 +44,7 @@ exports.getAllCourses = async (req, res) => {
 
 // @desc    Get a single course by ID (with all details)
 // @route   GET /api/v1/courses/:courseId
-exports.getCourseById = async (req, res) => {
+export const getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.courseId).populate(
       "instructor",
@@ -63,7 +63,7 @@ exports.getCourseById = async (req, res) => {
 
 // @desc    Update a course's main details
 // @route   PUT /api/v1/courses/:courseId
-exports.updateCourse = async (req, res) => {
+export const updateCourse = async (req, res) => {
   try {
     // If title is being updated, also update the slug
     if (req.body.title) {
@@ -92,7 +92,7 @@ exports.updateCourse = async (req, res) => {
 
 // @desc    Delete a course
 // @route   DELETE /api/v1/courses/:courseId
-exports.deleteCourse = async (req, res) => {
+export const deleteCourse = async (req, res) => {
   try {
     const course = await Course.findByIdAndDelete(req.params.courseId);
     if (!course) {
@@ -114,7 +114,7 @@ exports.deleteCourse = async (req, res) => {
 
 // @desc    Add a section to a course
 // @route   POST /api/v1/courses/:courseId/sections
-exports.addSection = async (req, res) => {
+export const addSection = async (req, res) => {
   try {
     const course = await Course.findById(req.params.courseId);
     if (!course) {
@@ -135,7 +135,7 @@ exports.addSection = async (req, res) => {
 
 // @desc    Update a section within a course
 // @route   PUT /api/v1/courses/:courseId/sections/:sectionId
-exports.updateSection = async (req, res) => {
+export const updateSection = async (req, res) => {
   try {
     const course = await Course.findById(req.params.courseId);
     if (!course) {
@@ -163,7 +163,7 @@ exports.updateSection = async (req, res) => {
 
 // @desc    Delete a section from a course
 // @route   DELETE /api/v1/courses/:courseId/sections/:sectionId
-exports.deleteSection = async (req, res) => {
+export const deleteSection = async (req, res) => {
   try {
     const course = await Course.findById(req.params.courseId);
     if (!course) {
@@ -190,7 +190,7 @@ exports.deleteSection = async (req, res) => {
 
 // @desc    Add a lecture to a section
 // @route   POST /api/v1/courses/:courseId/sections/:sectionId/lectures
-exports.addLecture = async (req, res) => {
+export const addLecture = async (req, res) => {
   try {
     const course = await Course.findById(req.params.courseId);
     if (!course) {
@@ -217,7 +217,7 @@ exports.addLecture = async (req, res) => {
 
 // @desc    Update a lecture in a section
 // @route   PUT /api/v1/courses/:courseId/sections/:sectionId/lectures/:lectureId
-exports.updateLecture = async (req, res) => {
+export const updateLecture = async (req, res) => {
   try {
     const course = await Course.findById(req.params.courseId);
     if (!course)
@@ -249,7 +249,7 @@ exports.updateLecture = async (req, res) => {
 
 // @desc    Delete a lecture from a section
 // @route   DELETE /api/v1/courses/:courseId/sections/:sectionId/lectures/:lectureId
-exports.deleteLecture = async (req, res) => {
+export const deleteLecture = async (req, res) => {
   try {
     const course = await Course.findById(req.params.courseId);
     if (!course)

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 //==================================================
@@ -108,4 +108,4 @@ const CourseSchema = new Schema(
 // Create the model from the schema and export it
 const Course = mongoose.model("Course", CourseSchema);
 
-module.exports = Course;
+export default Course;
