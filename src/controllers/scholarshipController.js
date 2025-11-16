@@ -29,36 +29,47 @@ export const getAllScholarships = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    // Fetch scholarships with filters & pagination
-    const scholarships = await Scholarship.find(filter)
-      .skip(skip)
-      .limit(parseInt(limit));
+    const today = new Date();
+
+    const scholarships = await Scholarship.aggregate([
+      { $match: filter },
+
+      //  Convert string deadline → real date
+      {
+        $addFields: {
+          deadlineDate: { $toDate: '$applicationDeadline' },
+        },
+      },
+
+      //  Mark expired items
+      {
+        $addFields: {
+          isExpired: { $lt: ['$deadlineDate', today] },
+        },
+      },
+
+      //  Sort: upcoming → expired → earliest first
+      {
+        $sort: {
+          isExpired: 1, // upcoming first
+          deadlineDate: 1, // earliest date first
+        },
+      },
+
+      { $skip: skip },
+      { $limit: parseInt(limit) },
+    ]);
 
     const total = await Scholarship.countDocuments(filter);
 
-    const today = new Date();
-
-    // Sort: upcoming deadlines first, expired last
-    const sorted = scholarships.sort((a, b) => {
-      const deadlineA = new Date(a.applicationDeadline);
-      const deadlineB = new Date(b.applicationDeadline);
-
-      const aExpired = deadlineA < today;
-      const bExpired = deadlineB < today;
-
-      if (aExpired && !bExpired) return 1; // expired last
-      if (!aExpired && bExpired) return -1; // upcoming first
-
-      return deadlineA - deadlineB; // sort by date if both same type
-    });
-
     res.status(200).json({
-      data: sorted,
+      data: scholarships,
       currentPage: Number(page),
       totalPages: Math.ceil(total / limit),
       totalItems: total,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
