@@ -31,9 +31,8 @@ export const createCourse = async (req, res) => {
 // @route   GET /api/v1/courses
 export const getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.find()
-      .select("-sections")
-      .populate("instructor", "name email");
+    const courses = await Course.find().select("-sections");
+    //   .populate("instructor", "name email");
     res
       .status(200)
       .json({ success: true, count: courses.length, data: courses });
@@ -46,10 +45,11 @@ export const getAllCourses = async (req, res) => {
 // @route   GET /api/v1/courses/:courseId
 export const getCourseById = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.courseId).populate(
-      "instructor",
-      "name email"
-    );
+    const course = await Course.findById(req.params.courseId);
+    // .populate(
+    //   "instructor",
+    //   "name email"
+    // );
     if (!course) {
       return res
         .status(404)
