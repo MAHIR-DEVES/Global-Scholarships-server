@@ -108,4 +108,11 @@ BlogPostSchema.pre("save", function (next) {
   next();
 });
 
+BlogPostSchema.index({ title: "text" });
+BlogPostSchema.index({ slug: "text" });
+BlogPostSchema.index({ "author.name": "text" });
+BlogPostSchema.index({ "author.email": "text" });
+BlogPostSchema.index({ status: 1 });
+BlogPostSchema.index({ publishedAt: 1 });
+
 export default mongoose.model("BlogPost", BlogPostSchema);
