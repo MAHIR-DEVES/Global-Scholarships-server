@@ -11,7 +11,9 @@ import {
   addLecture,
   updateLecture,
   deleteLecture,
+  getCourseContent,
 } from "../controllers/courseController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -23,6 +25,8 @@ router
   .get(getCourseById)
   .put(updateCourse)
   .delete(deleteCourse);
+
+router.route("/:courseId/watch").get(protect, getCourseContent);
 
 // == Section Routes ==
 // Note: Sections are nested under a specific course
