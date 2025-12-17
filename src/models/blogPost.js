@@ -60,6 +60,7 @@ const BlogPostSchema = new Schema(
       default: "draft",
       index: true,
     },
+    likes: { type: Number, default: 0, index: true },
     publishedAt: { type: Date },
 
     /* SEO */

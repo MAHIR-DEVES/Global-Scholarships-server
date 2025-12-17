@@ -102,6 +102,19 @@ export const getBlogPostBySlug = async (req, res, next) => {
   }
 };
 
+/* ----------------------------------------------------------------
+ * 3.5.  GET BY ID – GET /api/blog/id/:id
+ * ----------------------------------------------------------------*/
+export const getBlogPostById = async (req, res, next) => {
+  try {
+    const post = await BlogPost.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    return res.json(post);
+  } catch (err) {
+    return next(err);
+  }
+};
+
 /* ================================================================
  * 4. UPDATE  – PUT /api/blog/:id            (full or partial)
  * ===============================================================*/
@@ -162,6 +175,28 @@ export const deleteBlogPost = async (req, res, next) => {
     */
 
     res.json({ message: "Post deleted", id: result._id });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ================================================================
+ * 6. LIKE  – PATCH /api/blog/:id/like
+ * ===============================================================*/
+export const likeBlogPost = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body;
+
+    const increment = action === "unlike" ? -1 : 1;
+
+    const post = await BlogPost.findByIdAndUpdate(
+      id,
+      { $inc: { likes: increment } },
+      { new: true }
+    );
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    res.json(post);
   } catch (err) {
     next(err);
   }
