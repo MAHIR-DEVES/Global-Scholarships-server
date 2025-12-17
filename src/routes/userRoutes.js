@@ -4,14 +4,24 @@ import {
   createUser,
   loginUser,
   getUserProfile,
+  updateUserRole,
+  deleteUser,
 } from '../controllers/userControllers.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', getUsers);
+router.get('/', protect, authorize('admin'), getUsers);
 router.post('/', createUser);
 router.post('/login', loginUser);
 router.get('/profile', protect, getUserProfile);
+
+router
+  .route('/:id')
+  .delete(protect, authorize('admin'), deleteUser);
+
+router
+  .route('/:id/role')
+  .put(protect, authorize('admin'), updateUserRole);
 
 export default router;
