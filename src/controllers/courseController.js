@@ -1,4 +1,5 @@
 import Course from "../models/course.js";
+import Enrollment from "../models/Enrollment.js";
 import slugify from "slugify";
 
 // Reusable error handler
@@ -45,11 +46,14 @@ export const getAllCourses = async (req, res) => {
 // @route   GET /api/v1/courses/:courseId
 export const getCourseById = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.courseId);
-    // .populate(
-    //   "instructor",
-    //   "name email"
-    // );
+    let course = await Course.findOne({ slug: req.params.courseId });
+    if (!course) {
+        try {
+            course = await Course.findById(req.params.courseId);
+        } catch (err) {
+            // invalid id
+        }
+    }
     if (!course) {
       return res
         .status(404)
@@ -70,8 +74,23 @@ export const updateCourse = async (req, res) => {
       req.body.slug = slugify(req.body.title, { lower: true, strict: true });
     }
 
-    const course = await Course.findByIdAndUpdate(
-      req.params.courseId,
+    let course = await Course.findOne({ slug: req.params.courseId });
+    if (!course) {
+        try {
+            course = await Course.findById(req.params.courseId);
+        } catch (err) {
+            // invalid id
+        }
+    }
+
+    if (!course) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found" });
+    }
+
+    course = await Course.findByIdAndUpdate(
+      course._id,
       req.body,
       {
         new: true,
@@ -94,12 +113,22 @@ export const updateCourse = async (req, res) => {
 // @route   DELETE /api/v1/courses/:courseId
 export const deleteCourse = async (req, res) => {
   try {
-    const course = await Course.findByIdAndDelete(req.params.courseId);
+    let course = await Course.findOne({ slug: req.params.courseId });
+    if (!course) {
+        try {
+            course = await Course.findById(req.params.courseId);
+        } catch (err) {
+            // invalid id
+        }
+    }
+
     if (!course) {
       return res
         .status(404)
         .json({ success: false, message: "Course not found" });
     }
+
+    await course.deleteOne();
     res
       .status(200)
       .json({ success: true, message: "Course deleted successfully" });
@@ -270,6 +299,50 @@ export const deleteLecture = async (req, res) => {
     res
       .status(200)
       .json({ success: true, message: "Lecture deleted", data: course });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// @desc    Get course content for watching (Protected)
+// @route   GET /api/v1/courses/:courseId/watch
+export const getCourseContent = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Not authorized" });
+    }
+    const userId = req.user.id;
+    const courseSlug = req.params.courseId; // The route param is :courseId but it might be a slug
+
+    // Find course by slug or ID
+    let course = await Course.findOne({ slug: courseSlug });
+    if (!course) {
+        // Try by ID if slug fails
+        try {
+            course = await Course.findById(courseSlug);
+        } catch (err) {
+            // invalid id
+        }
+    }
+
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    // Check Enrollment
+    const enrollment = await Enrollment.findOne({
+      user: userId,
+      course: course._id,
+      status: 'approved'
+    });
+
+    if (!enrollment) {
+      return res.status(403).json({ success: false, message: "Access denied. You are not enrolled or approved for this course." });
+    }
+
+    // If approved, return the course data
+    res.status(200).json({ success: true, data: course });
+
   } catch (error) {
     handleError(res, error);
   }
